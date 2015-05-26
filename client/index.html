@@ -4,9 +4,12 @@
     <meta charset="utf-8">
     <title>chatterbox</title>
     <link rel="stylesheet" href="styles/styles.css">
-
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <!-- dependencies -->
     <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
     <!-- your scripts -->
     <script src="env/config.js"></script>
     <script src="scripts/app.js"></script>
@@ -15,6 +18,20 @@
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
+      <div class="menu">
+        <button class="refresh">Refresh</button>
+      </div>
+      <div id="rooms">
+        Room:
+        <select id="roomSelect">
+        </select>
+      </div>
+      <!-- <form id="send" method="post"> -->
+        <input type="text" name="message" id="message"/>
+        <button class="submit">Submit</button>
+        <!-- <input type="submit" name="submit" class="submit"/> -->
+      <!-- </form> -->
+      <ul id = "chats" class = "list-unstyled"></ul>
     </div>
   </body>
 </html>
