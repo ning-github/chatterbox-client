@@ -5,14 +5,12 @@
 var App = function(){
   this.data = {};
   this.rooms = {};
+  this.friends = {};
   this.refreshID = null;
+  this.url = 'https://api.parse.com/1/classes/chatterbox';
 }
 
-App.prototype.init = function(){
-  var index = window.location.href.indexOf("username=");
-  this.username = window.location.href.split("").slice(index+9).join("");
-};
-
+// take a message and send that message to the server
 App.prototype.send = function(message){
   $.ajax({
     url: 'https://api.parse.com/1/classes/chatterbox',
@@ -29,6 +27,7 @@ App.prototype.send = function(message){
   });
 };
 
+// perform a callback function
 App.prototype.fetch = function(url, callback){
   var context = this;
   $.ajax({
@@ -37,8 +36,7 @@ App.prototype.fetch = function(url, callback){
     contentType: 'application/json',
     success: function (data) {
       console.log('chatterbox: Message get');
-      _.extend(context.data, data);
-      _.each(data.results, callback);
+      callback(data.results); //callback takes an array of al message objects
     },
     error: function (data) {
       // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -48,11 +46,13 @@ App.prototype.fetch = function(url, callback){
 };
 
 App.prototype.clearMessages = function(){
-  $("#chats").html('');
+  $("#chats li").html('');
 };
 
-App.prototype.addMessage = function(msgObject){
+App.prototype.addMessage = function(msgObject, addTo){
+  addTo = addTo || 'appendTo';
   var $username = $('<div></div>').text(msgObject.username);
+  $username.addClass('username');
   var $text = $('<div></div>').text(msgObject.text);
   var $roomname = $('<div></div>').text(msgObject.roomname);
 
@@ -60,37 +60,65 @@ App.prototype.addMessage = function(msgObject){
   $message.addClass('well');
   $message.append($username, $text, $roomname);
 
-  $message.appendTo('#chats');
+  $message[addTo]('#chats');
 };
 
 App.prototype.refreshMessages = function() {
   var context = this;
 
-  var accessEach = function (obj) {
-    context.addMessage(obj);
+  //callback function takes in an array of message
+  //objects
+  var accessEach = function (objArray) {
+    _.each(objArray, function(item){
+        if(!(item.objectId in context.data)){
+          context.data[item.objectId] = item;
+          context.addMessage(item, "prependTo");
+        }
+    });
   };
 
   this.fetch('https://api.parse.com/1/classes/chatterbox', accessEach);
+
+  context.refreshRooms();
 };
 
 App.prototype.refreshRooms = function () {
   var context = this;
 
-  var getRooms = function (obj) {
-    context.rooms[obj.roomname] = obj.roomname;
+  var getRooms = function (objArray) {
+    _.each(objArray, function (item) {
+      if (!(item.roomname in context.rooms) && item.roomname) {
+        context.addRoom(item.roomname);
+        context.rooms[item.roomname] = item.roomname;
+      }
+    });
   }
 
   this.fetch('https://api.parse.com/1/classes/chatterbox', getRooms);
-
-  for (var key in context.rooms) {
-    if (key) {
-      $('<option></option>').val(key).text(key).appendTo('#roomSelect');
-    }
-  }
 }
 
-App.prototype.addRoom = function(){};
+App.prototype.addRoom = function(roomname){
+  $('<option></option>').val(roomname).text(roomname).appendTo('#roomSelect');
+};
 
+App.prototype.init = function(){
+  // obtain the username
+  var index = window.location.href.indexOf("username=");
+  this.username = window.location.href.split("").slice(index+9).join("");
+  
+  // get the rooms dropdown menu ready
+  app.refreshRooms();
+
+  var context = this;
+  // for each message object, iterate over its properties and 
+  this.fetch(this.url, function(array){
+    _.each(array, function(item){ 
+      // save its unique objectId, paired with the object itself
+      context.data[item.objectId] = item; 
+      context.addMessage(item, "appendTo");
+    });
+  });
+};
 
 var app = new App();
 app.init();
@@ -100,6 +128,7 @@ app.init();
 /////////////////////////////////////////////////
 $(document).on('ready', function () {
 
+  // begin auto feed-refresh
   $('.menu').on('click', 'button.refresh', function(e) {
     app.refreshID = setInterval(app.refreshMessages.bind(app), 1000);
     $(this).text('Stop Refreshing');
@@ -107,25 +136,41 @@ $(document).on('ready', function () {
     $(this).toggleClass('refresh');
   });
 
+  // stop auto feed-refresh
   $('.menu').on('click', 'button.stopRefresh', function(e) {
     if (app.refreshID) {
       clearInterval(app.refreshID);
     }
-
     $(this).text('Refresh');
     $(this).toggleClass('stopRefresh');
     $(this).toggleClass('refresh');
   });
 
+  // submit a new message/room
   $('.submit').on('click', function(e){
+    var room = $('#roomname').val();
+
+    if (room === '') {
+      room = $('#roomSelect').val();
+    }
+
     var msg = {
       username: app.username,
-      roomname: "Ning and JP's Special Place",
+      roomname: room,
       text: $('#message').val()
     };
 
     app.send(msg);
     $('#message').val('');
+  });
+
+  // add a friend
+  $('#main').on('click', '.username', function (e) {
+    var name = $(this).text();
+    if (!(name in app.friends)) {
+      $('.friends-list').append($('<li></li>').text(name));
+      app.friends[name] = name;
+    }
   });
 
 });

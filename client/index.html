@@ -15,20 +15,33 @@
     <script src="scripts/app.js"></script>
   </head>
   <body>
-    <div id="main">
-      <h1>chatterbox</h1>
-      <!-- Your HTML goes here! -->
-      <div class="menu">
-        <button class="refresh">Refresh</button>
-      </div>
-      <div id="rooms">
-        Room:
-        <select id="roomSelect">
-        </select>
-      </div>
-        <input type="text" name="message" id="message"/>
-        <button class="submit">Submit</button>
-      <ul id = "chats" class = "list-unstyled"></ul>
-    </div>
+    <div id="main" class="container">
+      <div class="row">
+
+        <section class="col-md-6 col-md-offset-2">
+          <h1>chatterbox</h1>
+          <div class="menu">
+            <button class="refresh">Refresh</button>
+          </div>
+
+          <div class="inputArea">
+            <div id="rooms"> Room:
+              <select id="roomSelect"></select>
+            </div>
+            <p>New Room: <input type="text" name="roomname" id="roomname"/></p>
+            <p>Message: <input type="text" name="message" id="message"/></p>
+            <button class="submit">Submit</button>
+          </div>
+
+          <ul id = "chats" class = "list-unstyled"></ul>
+        </section>
+
+        <section class="col-md-2 col-md-offset-1">
+          <h2>friends</h2>
+          <ul class="friends-list"></ul>
+        </section>
+
+      </div> <!--row-->
+    </div> <!--main-->
   </body>
 </html>
