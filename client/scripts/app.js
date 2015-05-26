@@ -54,6 +54,7 @@ App.prototype.addMessage = function(msgObject, addTo){
   var $username = $('<div></div>').text(msgObject.username);
   $username.addClass('username');
   var $text = $('<div></div>').text(msgObject.text);
+  $text.addClass('msgText');
   var $roomname = $('<div></div>').text(msgObject.roomname);
 
   var $message = $('<li></li>');
@@ -70,17 +71,27 @@ App.prototype.refreshMessages = function() {
   //objects
   var accessEach = function (objArray) {
     _.each(objArray, function(item){
-        if(!(item.objectId in context.data)){
-          context.data[item.objectId] = item;
-          context.addMessage(item, "prependTo");
-        }
+      if(!(item.objectId in context.data)){
+        context.data[item.objectId] = item;
+        context.addMessage(item, "prependTo");
+      }
     });
   };
 
   this.fetch('https://api.parse.com/1/classes/chatterbox', accessEach);
 
   context.refreshRooms();
+  context.highlightFriends();
 };
+
+App.prototype.highlightFriends = function () {
+  var context = this;
+  _.each($('li'), function (item) {
+    if ($(item).children('.username').text() in context.friends){
+      $(item).children('.msgText').addClass('bolded');
+    }
+  });
+}
 
 App.prototype.refreshRooms = function () {
   var context = this;
@@ -105,16 +116,16 @@ App.prototype.init = function(){
   // obtain the username
   var index = window.location.href.indexOf("username=");
   this.username = window.location.href.split("").slice(index+9).join("");
-  
+
   // get the rooms dropdown menu ready
   app.refreshRooms();
 
   var context = this;
-  // for each message object, iterate over its properties and 
+  // for each message object, iterate over its properties and
   this.fetch(this.url, function(array){
-    _.each(array, function(item){ 
+    _.each(array, function(item){
       // save its unique objectId, paired with the object itself
-      context.data[item.objectId] = item; 
+      context.data[item.objectId] = item;
       context.addMessage(item, "appendTo");
     });
   });
@@ -171,6 +182,7 @@ $(document).on('ready', function () {
       $('.friends-list').append($('<li></li>').text(name));
       app.friends[name] = name;
     }
+    app.highlightFriends();
   });
 
 });

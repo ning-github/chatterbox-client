@@ -86,3 +86,7 @@ form input[type=text] {
 .inputArea {
     margin-bottom: 30px;
 }
+
+.bolded {
+    font-weight: bold;
+}
