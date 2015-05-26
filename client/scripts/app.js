@@ -87,7 +87,6 @@ App.prototype.refreshRooms = function () {
       $('<option></option>').val(key).text(key).appendTo('#roomSelect');
     }
   }
-
 }
 
 App.prototype.addRoom = function(){};
