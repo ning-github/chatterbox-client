@@ -84,6 +84,7 @@ App.prototype.refreshMessages = function() {
   context.highlightFriends();
 };
 
+
 App.prototype.highlightFriends = function () {
   var context = this;
   _.each($('li'), function (item) {
@@ -182,6 +183,7 @@ $(document).on('ready', function () {
       $('.friends-list').append($('<li></li>').text(name));
       app.friends[name] = name;
     }
+    // highlight that friend's messages
     app.highlightFriends();
   });
 
