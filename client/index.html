@@ -9,6 +9,7 @@
     <script src="bower_components/jquery/jquery.min.js"></script>
     <script src="bower_components/underscore/underscore-min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/backbone/backbone-min.js"></script>
 
     <!-- your scripts -->
     <script src="env/config.js"></script>
@@ -44,4 +45,18 @@
       </div> <!--row-->
     </div> <!--main-->
   </body>
+  <script>
+    $(document).on('ready', function () {
+      var messages = new Messages();
+      var messagesView = new MessagesView({
+        collection: messages,
+        el: $('#chats')
+      });
+      var submitView = new SubmitView({
+        collection: messages,
+        el: $('.inputArea')
+      });
+      setInterval(messages.loadMessages.bind(messages), 1000);
+    });
+  </script>
 </html>
